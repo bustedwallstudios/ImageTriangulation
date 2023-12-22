@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2eo0btfu8xwj"]
+
+[ext_resource type="Script" path="res://Triangulizer.gd" id="1_f1x0y"]
+
+[node name="Triangulizer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_f1x0y")
+
+[node name="Sprite" type="TextureRect" parent="."]
+z_index = -4096
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+
+[node name="Text" type="Label" parent="."]
+z_index = -11
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -612.0
+offset_top = -44.0
+offset_right = 640.0
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 64
+text = "Triangulating. . ."
+vertical_alignment = 1
+
+[node name="Polygons" type="Node" parent="."]
