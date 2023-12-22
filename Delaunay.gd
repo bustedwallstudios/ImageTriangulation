@@ -1,5 +1,7 @@
 extends Node
 
+# Uses the classic gradual point integration method for triangulating a Delaunay
+# mesh.
 func triangulation(points:PackedVector2Array):
 	# The list of current triangles that are inside the polygon. Starts at zero,
 	# and triangles are added and removed over the course of this algorithm.
@@ -13,19 +15,11 @@ func triangulation(points:PackedVector2Array):
 	var superTriangle:Array = getSuperTriangle(boundingBox)
 	triangles.append(superTriangle)
 	
-	# number of complete triangles
-	#var completedPoints:int = 0
-	#var totalPoints:int = len(points)
-	#var progress:float = 0
-	
 	# One at a time, integrate all the points into the triangulation.
 	for point in points:
 		var badTriangles:Array = []
 		
 		for thisTriangle in triangles:
-			#var thisTriPos:Vector2 = thisTriangle[0]
-			#var distance:float     = thisTriPos.distance_to(point)
-			
 			# If the point is inside the circumcircle of this triangle, then it
 			# is not a valid Delaunay Triangulation. Thus, this triangle is bad.
 			if inCircumcircleOf(thisTriangle, point):
@@ -82,100 +76,7 @@ func triangulation(points:PackedVector2Array):
 	
 	#print(finalTrianglesArray)
 	
-	get_tree().current_scene.drawTriangles(finalTrianglesArray)
-
-func mergeTriangulations(leftTriangulation: Array, rightTriangulation: Array) -> Array:
-	var mergedTriangulation = []  # Initialize the merged triangulation
-	
-	# Find the lower common tangent between the two triangulations
-	var lowerTangent = findLowerTangent(leftTriangulation, rightTriangulation)
-	
-	# Find the upper common tangent between the two triangulations
-	var upperTangent = findUpperTangent(leftTriangulation, rightTriangulation)
-	
-	# Merge the triangulations using the common tangents
-	var lIndex = leftTriangulation.find(lowerTangent[0])
-	var rIndex = rightTriangulation.find(lowerTangent[1])
-	
-	while lIndex != leftTriangulation.find(upperTangent[0]):
-		mergedTriangulation.append(leftTriangulation[lIndex])
-		lIndex = (lIndex + 1) % len(leftTriangulation)
-	
-	mergedTriangulation.append(leftTriangulation[lIndex])
-	
-	while rIndex != rightTriangulation.find(upperTangent[1]):
-		mergedTriangulation.append(rightTriangulation[rIndex])
-		rIndex = (rIndex + 1) % len(rightTriangulation)
-	
-	mergedTriangulation.append(rightTriangulation[rIndex])
-	
-	return mergedTriangulation
-	
-func findLowerTangent(leftTriangulation: Array, rightTriangulation: Array) -> Array:
-	var lIndex = 0
-	var rIndex = 0
-	var done = false
-	
-	while not done:
-		done = true
-		# Find the rightmost point of the left triangulation
-		var lNext = (lIndex + 1) % len(leftTriangulation)
-		
-		# Find the leftmost point of the right triangulation
-		var rNext = (len(rightTriangulation) + rIndex - 1) % len(rightTriangulation)
-		 
-		# Check if moving from lIndex to lNext makes a right turn towards rightTriangulation[rNext]
-		if determinant_4x4([leftTriangulation[lNext], leftTriangulation[lIndex], rightTriangulation[rNext], leftTriangulation[lIndex]]) > 0:
-			lIndex = lNext
-			done = false
-		 
-		# Check if moving from rIndex to rNext makes a left turn towards leftTriangulation[lNext]
-		if determinant_4x4([rightTriangulation[rIndex], rightTriangulation[rNext], leftTriangulation[lNext], rightTriangulation[rIndex]]) < 0:
-			rIndex = rNext
-			done = false
-
-	return [leftTriangulation[lIndex], rightTriangulation[rIndex]]
-
-func findUpperTangent(leftTriangulation: Array, rightTriangulation: Array) -> Array:
-	var lIndex = 0
-	var rIndex = 0
-	var done = false
-
-	while not done:
-		done = true
-		# Find the rightmost point of the left triangulation
-		var lNext = (len(leftTriangulation) + lIndex - 1) % len(leftTriangulation)
-		 
-		# Find the leftmost point of the right triangulation
-		var rNext = (rIndex + 1) % len(rightTriangulation)
-		 
-		# Check if moving from lIndex to lNext makes a left turn towards rightTriangulation[rNext]
-		if determinant_4x4([leftTriangulation[lNext], leftTriangulation[lIndex], rightTriangulation[rNext], leftTriangulation[lIndex]]) < 0:
-			lIndex = lNext
-			done = false
-		 
-		# Check if moving from rIndex to rNext makes a right turn towards leftTriangulation[lNext]
-		if determinant_4x4([rightTriangulation[rIndex], rightTriangulation[rNext], leftTriangulation[lNext], rightTriangulation[rIndex]]) > 0:
-			rIndex = rNext
-			done = false
-
-	return [leftTriangulation[lIndex], rightTriangulation[rIndex]]
-
-func dividePoints(points: Array) -> Array:
-	# Sort the points based on their x-coordinate
-	var sortedPoints:Array = points.duplicate()
-	sortedPoints.sort_custom(func(a, b): return a.x < b.x)
-	
-	# Find the midpoint index
-	var midpoint:int = int(len(sortedPoints) / 2.0)
-	
-	# Divide the points into left and right subsets
-	var leftSubset  = sortedPoints.slice(0, midpoint)
-	var rightSubset = sortedPoints.slice(midpoint, len(sortedPoints))
-	
-	return [leftSubset, rightSubset]
-
-# ^ NEW FUNCTIONS FOR DIVIDE AND CONQUER APPROACH ^ ################################################
+	get_tree().current_scene.drawPolygons(finalTrianglesArray)
 
 # Returns whether or not it found (and subsequently removed) the component
 func removeComponentFromArray(componentArray:Array, outsideArray:Array) -> bool:

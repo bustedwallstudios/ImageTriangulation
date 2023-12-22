@@ -1,17 +1,20 @@
 extends Control
 
-@export_range(1, 100_000) var vertexCount:int = 1000
+@export_range(1, 100_000) var vertexCount:int = 10000
 
-@export_range(1.0, 7.0) var threadCount:float = 4
+@export_enum("Triangles", "Hexagons") var shape:int = 1
+
+@export_range(1.0, 7.0) var threadCount:float = 7
 
 @export var drawVertices:bool = false # Whether to draw a circle at all the points
 
 const windowSize:Vector2 = Vector2(1280, 720)
 
-const imagePath:String = "res://image.png"
+const imagePath:String = "res://1920x1080.png"
 
 # Will be randomly filled to hold all the triangles 
 var vertices       := []
+var edgeLength:float
 var triangles      := []
 var triangleColors := [] # The color of the center pixel in the triangle
 
@@ -39,7 +42,6 @@ func _ready():
 		if vH > windowSize.y * 0.25 and (vH < (windowSize.y * 0.5 ) + 50): Q2.append(vertex)
 		if vH > windowSize.y * 0.5  and (vH < (windowSize.y * 0.75) + 50): Q3.append(vertex)
 		if vH > windowSize.y * 0.75:                                       Q4.append(vertex)
-		
 	
 	print("\nProcessing first quarter")
 	processArray(Q1)
@@ -77,10 +79,71 @@ func processArray(arr:Array):
 			
 		print("Thread ", threadIdx, " processing ", len(thisThreadsPiece), " vertices")
 		
-		# This function will call drawTriangles() for each eighth.
-		newThread.start(Isoceles.triangulation.bind(thisThreadsPiece))
+		# This function will call drawPolygons() for each eighth.
+		newThread.start(Isoceles.triangulation.bind(thisThreadsPiece, edgeLength, shape))
 
-func drawTriangles(triangleList:Array):
+func deterministicallyGenerateVertices(howMany:int) -> Array:
+	var vertexList := []
+	
+	# Add the left corners of the screen first, because the points have to be 
+	# ordered left to right, so that each thread can just take charge of one
+	# piece.
+	vertexList.append(Vector2(0, 0))
+	vertexList.append(Vector2(0, windowSize.y))
+	
+	# Calculate the number of points along each axis
+	var gridSizeX = int(sqrt(howMany))  # Adjust for the number of points needed
+	var gridSizeY = int(sqrt(howMany))  # Adjust for the number of points needed
+	
+	# The edges are all the same length - they're Isosceles triangles
+	edgeLength = windowSize.x / float(gridSizeX)
+	var b = edgeLength*2 # The buffer outside the screen, so there's no missing pixels around the edge
+	
+	for i in range(-b, gridSizeX + b):
+		for j in range(-b, gridSizeY + b):
+			var xCompletion = i / float(gridSizeX-1)
+			var yCompletion = j / float(gridSizeY-1)
+			
+			var halfXOffset = (0.5*edgeLength * (j%2)) # So that they form hexagons instead of a grid
+			
+			var x = xCompletion * windowSize.x + halfXOffset  # Distribute points evenly along X
+			var y = yCompletion * windowSize.y * 1.5 # Distribute points evenly along Y
+			
+			var newVertex := Vector2(x, y)
+			vertexList.append(newVertex)
+	
+	# Append the right side corners
+	vertexList.append(Vector2(windowSize.x, 0))
+	vertexList.append(Vector2(windowSize.x, windowSize.y))
+	
+	return vertexList
+
+func randomlyGenerateVertices(howMany:int) -> Array:
+	var vertexList := []
+	
+	# Add the corners of the screen
+	vertexList.append(Vector2(0, 0))
+	vertexList.append(Vector2(0, windowSize.y))
+	
+	# Calculate the number of points along each axis
+	#var gridSizeX = int(sqrt(howMany))  # Adjust for the number of points needed
+	#var gridSizeY = int(sqrt(howMany))  # Adjust for the number of points needed
+	
+	#var edgeLength = windowSize.x / float(gridSizeX)
+	
+	for i in range(howMany):
+		var x = i/float(howMany) * windowSize.x
+		var y = randf_range(0, windowSize.y)  # Distribute points evenly along Y
+		
+		var newVertex := Vector2(x, y)
+		vertexList.append(newVertex)
+	
+	vertexList.append(Vector2(windowSize.x, 0))
+	vertexList.append(Vector2(windowSize.x, windowSize.y))
+	
+	return vertexList
+
+func drawPolygons(triangleList:Array):
 	# Load the original image
 	var originalImage = Image.new()
 	originalImage.load(imagePath)
@@ -110,71 +173,6 @@ func drawTriangles(triangleList:Array):
 		#polygonNode.color.a = 0.5
 		
 		self.call_deferred("add_child", polygonNode)
-
-func deterministicallyGenerateVertices(howMany:int) -> Array:
-	var vertexList := []
-	
-	# Add the left corners of the screen first, because the points have to be 
-	# ordered left to right, so that each thread can just take charge of one
-	# piece.
-	vertexList.append(Vector2(0, 0))
-	vertexList.append(Vector2(0, windowSize.y))
-	
-	# Calculate the number of points along each axis
-	var gridSizeX = int(sqrt(howMany))  # Adjust for the number of points needed
-	var gridSizeY = int(sqrt(howMany))  # Adjust for the number of points needed
-	
-	var cellSizeX = windowSize.x / float(gridSizeX)
-	
-	for i in range(gridSizeX):
-		#await get_tree().process_frame
-		#var progress = float(i) / float(gridSizeX)
-		#$Label.text = "Generating vertices . . . " + str(round(progress*1000)/10) + "%"
-		
-		for j in range(gridSizeY):
-			var xCompletion = i / float(gridSizeX-1)
-			var yCompletion = j / float(gridSizeY-1)
-			
-			
-			var halfXOffset = (0.5*cellSizeX * (j%2)) # So that they form hexagons instead of a grid
-			
-			
-			var x = xCompletion * windowSize.x + halfXOffset  # Distribute points evenly along X
-			var y = yCompletion * windowSize.y * 1.5 # Distribute points evenly along Y
-			
-			var newVertex := Vector2(x, y)
-			vertexList.append(newVertex)
-	
-	# Append the right side corners
-	vertexList.append(Vector2(windowSize.x, 0))
-	vertexList.append(Vector2(windowSize.x, windowSize.y))
-	
-	return vertexList
-
-func randomlyGenerateVertices(howMany:int) -> Array:
-	var vertexList := []
-	
-	# Add the corners of the screen
-	vertexList.append(Vector2(0, 0))
-	vertexList.append(Vector2(0, windowSize.y))
-	
-	# Calculate the number of points along each axis
-	#var gridSizeX = int(sqrt(howMany))  # Adjust for the number of points needed
-	#var gridSizeY = int(sqrt(howMany))  # Adjust for the number of points needed
-	
-	#var cellSizeX = windowSize.x / float(gridSizeX)
-	
-	for i in range(howMany):
-		var x = i/float(howMany) * windowSize.x
-		var y = randf_range(0, windowSize.y)  # Distribute points evenly along Y
-		
-		var newVertex := Vector2(x, y)
-		vertexList.append(newVertex)
-	
-	vertexList.append(Vector2(windowSize.x, 0))
-	vertexList.append(Vector2(windowSize.x, windowSize.y))
-	
-	return vertexList
 
 # Function to calculate center of a triangle
 func getTriangleCenter(triangle:Array) -> Vector2:

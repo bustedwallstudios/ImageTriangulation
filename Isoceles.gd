@@ -1,25 +1,49 @@
 extends Node
 
 # Returns an array of triangles
-func triangulation(points:Array) -> Array:
+func triangulation(points:Array, sideLength:float, shape:int=1) -> Array:
 	var triangles = []
-	var rowCount = int(sqrt(points.size()))  # Assuming a square grid
 	
-	for y in range(rowCount - 1):
-		for x in range(rowCount - 1):
-			var baseIndex = y * rowCount + x
+	var lengthVec := Vector2(sideLength + 0.5, 0)
+	
+	for point in points:
+		match shape:
+			0:
+				var tris = getTris(point, lengthVec)
+				triangles.append_array(tris)
 			
-			# Define the vertices of the two triangles in each grid cell
-			var v1 = points[baseIndex]
-			var v2 = points[baseIndex + 1]
-			var v3 = points[baseIndex + rowCount]
-			
-			var v4 = points[baseIndex + 1]
-			var v5 = points[baseIndex + rowCount]
-			var v6 = points[baseIndex + rowCount + 1]
-			
-			# Append triangles to the list
-			triangles.append([v1, v2, v3])
-			triangles.append([v4, v5, v6])
+			1:
+				var hex = getHex(point, lengthVec)
+				
+				triangles.append(hex)
+	
+	print("Done triangulating this segment!")
+	
+	get_tree().current_scene.drawPolygons(triangles)
 	
 	return triangles
+
+func getTris(point:Vector2, lengthVec:Vector2):
+	var t1v1 = point
+	var t1v2 = point + lengthVec
+	var t1v3 = point + lengthVec.rotated(TAU/6.0)
+	var t1:Array = [t1v1, t1v2, t1v3]
+	
+	var t2v1 = point
+	var t2v2 = point + lengthVec.rotated(TAU/6.0)
+	var t2v3 = point + lengthVec.rotated((TAU/6.0) * 2)
+	var t2:Array = [t2v1, t2v2, t2v3]
+	
+	return [t1, t2]
+
+func getHex(point:Vector2, lengthVec:Vector2):
+	var hex := []
+	
+	for i in range(0, 6):
+		var deg:float = (TAU * (i/6.0)) + TAU/12.0
+		var mag:float = (lengthVec.length() * sqrt(3))/3.0
+		var p = point + lengthVec.normalized().rotated(deg) * mag
+		
+		hex.append(p)
+	
+	return hex
