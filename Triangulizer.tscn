@@ -10,7 +10,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_f1x0y")
-vertexCount = 20860
+vertexCount = 20000
+shape = 0
 
 [node name="Sprite" type="TextureRect" parent="."]
 z_index = -4096
@@ -33,3 +34,5 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 32
 text = "Triangulating. . ."
+
+[node name="Polygons" type="Node" parent="."]

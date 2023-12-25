@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl2dw6n28lwev"
-path="res://.godot/imported/planetMoon.png-a7105ab96aa4e417a0672e616f1b502d.ctex"
+uid="uid://ch2y8p4cyjmy"
+path="res://.godot/imported/beautifulViewOfTheGalaxie.png-96ed81a387d883510cfa33d3c439d449.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://planetMoon.png"
-dest_files=["res://.godot/imported/planetMoon.png-a7105ab96aa4e417a0672e616f1b502d.ctex"]
+source_file="res://images/beautifulViewOfTheGalaxie.png"
+dest_files=["res://.godot/imported/beautifulViewOfTheGalaxie.png-96ed81a387d883510cfa33d3c439d449.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ch2y8p4cyjmy"
-path="res://.godot/imported/beautifulViewOfTheGalaxie.png-0cb882138583233146bc59613f8fc8d1.ctex"
+uid="uid://8cwo1oiraodu"
+path="res://.godot/imported/2160x1440.png-e3fc8a2e5cbc0fc2f38c5173eb9223fe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://beautifulViewOfTheGalaxie.png"
-dest_files=["res://.godot/imported/beautifulViewOfTheGalaxie.png-0cb882138583233146bc59613f8fc8d1.ctex"]
+source_file="res://images/2160x1440.png"
+dest_files=["res://.godot/imported/2160x1440.png-e3fc8a2e5cbc0fc2f38c5173eb9223fe.ctex"]
 
 [params]
 

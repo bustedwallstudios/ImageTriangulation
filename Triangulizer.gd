@@ -10,7 +10,7 @@ extends Control
 
 const windowSize:Vector2 = Vector2(1280, 720)
 
-const imagePath:String = "res://1920x1080.png"
+const imagePath:String = "res://images/jesse/jesse5.png"
 
 # Will be randomly filled to hold all the triangles 
 var vertices       := []
@@ -26,6 +26,12 @@ func _ready():
 	$Sprite.texture = ImageTexture.create_from_image(originalImage)
 	
 	await get_tree().create_timer(0.1).timeout
+	
+	await pixelateImage()
+
+func pixelateImage():
+	
+	clearCurrentPolygons()
 	
 	vertices = deterministicallyGenerateVertices(vertexCount)
 	
@@ -57,6 +63,10 @@ func _ready():
 	
 	print("\nProcessing fourth quarter")
 	processArray(Q4)
+
+func clearCurrentPolygons():
+	for node in get_tree().get_nodes_in_group("Polygons"):
+		node.queue_free()
 
 func processArray(arr:Array):
 	for threadIdx in range(0, threadCount):
@@ -170,7 +180,7 @@ func drawPolygons(triangleList:Array):
 		polygonNode.polygon = PackedVector2Array(triangle)
 		polygonNode.color   = polyColor
 		polygonNode.z_index = -10
-		#polygonNode.color.a = 0.5
+		polygonNode.add_to_group("Polygons")
 		
 		self.call_deferred("add_child", polygonNode)
 
@@ -220,9 +230,28 @@ func cross(a:Vector2, b:Vector2) -> float:
 #endregion
 
 func _input(event):
+	
+	if Input.is_action_just_pressed("activateHexagons"):
+		self.shape = 1
+		pixelateImage()
+	
+	if Input.is_action_just_pressed("activateTriangles"):
+		self.shape = 0
+		pixelateImage()
+	
+	if Input.is_action_just_pressed("embiggen"):
+		self.vertexCount /= 1.5
+		pixelateImage()
+	
+	if Input.is_action_just_pressed("emshrinken"):
+		self.vertexCount *= 1.5
+		pixelateImage()
+	
 	# If they press F11, toggle fullscreen within the game
 	if event.is_action_pressed("uiFullscreen"):
-		get_window().mode = Window.MODE_EXCLUSIVE_FULLSCREEN if (!((get_window().mode == Window.MODE_EXCLUSIVE_FULLSCREEN) or (get_window().mode == Window.MODE_FULLSCREEN))) else Window.MODE_WINDOWED
+		#print(get_window().mode, Window.MODE_WINDOWED, Window.MODE_FULLSCREEN)
+		if get_window().mode == Window.MODE_WINDOWED: get_window().mode = Window.MODE_EXCLUSIVE_FULLSCREEN
+		else: get_window().mode = Window.MODE_WINDOWED
 
 func _draw():
 	if drawVertices:
