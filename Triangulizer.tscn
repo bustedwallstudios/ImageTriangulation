@@ -10,7 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_f1x0y")
-vertexCount = 20000
+vertexCount = 1000
 shape = 0
 
 [node name="Sprite" type="TextureRect" parent="."]

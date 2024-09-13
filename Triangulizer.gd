@@ -1,16 +1,19 @@
 extends Control
 
+@export_subgroup("Triangulation")
 @export_range(1, 100_000) var vertexCount:int = 10000
 
 @export_enum("Triangles", "Hexagons") var shape:int = 1
 
+@export_subgroup("Technical")
 @export_range(1.0, 7.0) var threadCount:float = 7
 
 @export var drawVertices:bool = false # Whether to draw a circle at all the points
 
 const windowSize:Vector2 = Vector2(1280, 720)
 
-const imagePath:String = "res://images/jesse/jesse5.png"
+const filePath:String = "res://images/beautifulViewOfTheGalaxie.png"
+var fileImage:Image = Image.load_from_file(filePath)
 
 # Will be randomly filled to hold all the triangles 
 var vertices       := []
@@ -21,9 +24,7 @@ var triangleColors := [] # The color of the center pixel in the triangle
 func _ready():
 	# Set the sprite's texture to the image, while the triangulation and stuff
 	# is being done
-	var originalImage = Image.new()
-	originalImage.load(imagePath)
-	$Sprite.texture = ImageTexture.create_from_image(originalImage)
+	$Sprite.texture = load(filePath)
 	
 	await get_tree().create_timer(0.1).timeout
 	
@@ -72,7 +73,7 @@ func processArray(arr:Array):
 	for threadIdx in range(0, threadCount):
 		var newThread = Thread.new()
 		
-		var verticesPerThread:int = len(arr)/threadCount
+		var verticesPerThread:int = float(len(arr))/threadCount
 		
 		# The points that this thread will be processing
 		var thisThreadsPiece:Array = []
@@ -91,6 +92,7 @@ func processArray(arr:Array):
 		
 		# This function will call drawPolygons() for each eighth.
 		newThread.start(Isoceles.triangulation.bind(thisThreadsPiece, edgeLength, shape))
+		newThread.wait_to_finish() # Necessary to remove warnings, although doesn't change anything here.
 
 func deterministicallyGenerateVertices(howMany:int) -> Array:
 	var vertexList := []
@@ -155,8 +157,7 @@ func randomlyGenerateVertices(howMany:int) -> Array:
 
 func drawPolygons(triangleList:Array):
 	# Load the original image
-	var originalImage = Image.new()
-	originalImage.load(imagePath)
+	var originalImage:Image = fileImage.duplicate()
 	
 	var imgW = originalImage.get_width()
 	var imgH = originalImage.get_height()
@@ -174,7 +175,7 @@ func drawPolygons(triangleList:Array):
 		
 		# Get the color from the image at those coordinates
 		@warning_ignore("narrowing_conversion")
-		var polyColor := originalImage.get_pixel(centerPos.x, centerPos.y)
+		var polyColor = originalImage.get_pixel(centerPos.x, centerPos.y)
 		
 		var polygonNode     = Polygon2D.new()
 		polygonNode.polygon = PackedVector2Array(triangle)
