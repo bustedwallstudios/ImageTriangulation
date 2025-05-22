@@ -12,7 +12,7 @@ extends Control
 
 const windowSize:Vector2 = Vector2(1280, 720)
 
-const filePath:String = "res://images/beautifulViewOfTheGalaxie.png"
+const filePath:String = "res://images/planetMoon.png"
 var fileImage:Image = Image.load_from_file(filePath)
 
 # Will be randomly filled to hold all the triangles 
@@ -232,24 +232,24 @@ func cross(a:Vector2, b:Vector2) -> float:
 
 func _input(event):
 	
-	if Input.is_action_just_pressed("activateHexagons"):
+	if Input.is_action_just_pressed("activateHexagons"): # H
 		self.shape = 1
 		pixelateImage()
 	
-	if Input.is_action_just_pressed("activateTriangles"):
+	if Input.is_action_just_pressed("activateTriangles"): # T
 		self.shape = 0
 		pixelateImage()
 	
-	if Input.is_action_just_pressed("embiggen"):
+	if Input.is_action_just_pressed("embiggen"): # =
 		self.vertexCount /= 1.5
 		pixelateImage()
 	
-	if Input.is_action_just_pressed("emshrinken"):
+	if Input.is_action_just_pressed("emshrinken"): # -
 		self.vertexCount *= 1.5
 		pixelateImage()
 	
 	# If they press F11, toggle fullscreen within the game
-	if event.is_action_pressed("uiFullscreen"):
+	if event.is_action_pressed("uiFullscreen"): # F11
 		#print(get_window().mode, Window.MODE_WINDOWED, Window.MODE_FULLSCREEN)
 		if get_window().mode == Window.MODE_WINDOWED: get_window().mode = Window.MODE_EXCLUSIVE_FULLSCREEN
 		else: get_window().mode = Window.MODE_WINDOWED

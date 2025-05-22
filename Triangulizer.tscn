@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c2eo0btfu8xwj"]
 
-[ext_resource type="Script" path="res://Triangulizer.gd" id="1_f1x0y"]
+[ext_resource type="Script" uid="uid://dmp6swdl2duut" path="res://Triangulizer.gd" id="1_f1x0y"]
 
 [node name="Triangulizer" type="Control"]
 layout_mode = 3
@@ -10,7 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_f1x0y")
-vertexCount = 1000
+vertexCount = 50000
 shape = 0
 
 [node name="Sprite" type="TextureRect" parent="."]
